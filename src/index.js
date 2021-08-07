@@ -77,6 +77,7 @@ function deleteCheck(event) {
         removeLocalSave(toDel);
         toDel.addEventListener('transitionend', function(){
             toDel.remove();
+            updateTotal();
         });
         
     }
@@ -85,8 +86,6 @@ function deleteCheck(event) {
         const toCompl = item.parentElement;
         toCompl.classList.toggle('completed');
     }
-    //Update total
-    updateTotal();
 }
 
 function saveLocalShopping(Item, Arrayname) {
