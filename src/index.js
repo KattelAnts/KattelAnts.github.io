@@ -7,7 +7,7 @@ const addButton = document.querySelector("#add-btn");
 const totalPar = document.querySelector('#total-par');
 
 //Event Listener
-document.addEventListener("DOMContentLoaded", getLocalSave);
+window.addEventListener("load", getLocalSave);
 addButton.addEventListener("click", addItem);
 shoppingList.addEventListener("click", deleteCheck);
 
@@ -26,8 +26,9 @@ function addItem(event) {
     newItem.classList.add("shopping-item");
     shoppingDiv.appendChild(newItem);
     //ADD PRICE
-    const itemPrice = document.createElement("p");
-    itemPrice.innerText = price.value * amount.value + " €";
+    const itemPrice = document.createElement("span");
+    tempPrice = Math.round((price.value * amount.value + Number.EPSILON) * 100) / 100;
+    itemPrice.innerText =  tempPrice + " €";
     itemPrice.classList.add("item-price");
     shoppingDiv.appendChild(itemPrice);
     //CHECK MARK BUTTON
@@ -50,6 +51,7 @@ function addItem(event) {
         saveLocalShopping(itemInput.value, 'Items');
         saveLocalShopping(amount.value, 'Amounts');
         saveLocalShopping(price.value, 'Prices');
+        saveLocalShopping("uncompleted", 'Statuses');
     //Clear input values
     itemInput.value = "";
     amount.value = "";
@@ -84,7 +86,13 @@ function deleteCheck(event) {
     //Toggle item completed
     if(item.className === "btn btn-success") {
         const toCompl = item.parentElement;
-        toCompl.classList.toggle('completed');
+        if (toCompl.classList.contains('completed')) {
+            changeLocalStatus(toCompl, 'uncompleted');
+            toCompl.classList.remove('completed');
+        } else {
+            changeLocalStatus(toCompl, 'completed');
+            toCompl.classList.add('completed');
+        }
     }
 }
 
@@ -104,6 +112,7 @@ function getLocalSave(){
     let items;
     let amounts;
     let prices;
+    let statuses;
     if(localStorage.getItem('Items') === null) {
         items = [];
     }else{
@@ -119,19 +128,28 @@ function getLocalSave(){
     }else{
         prices = JSON.parse(localStorage.getItem('Prices'));
     }
+    if(localStorage.getItem('Statuses') === null) {
+        statuses = [];
+    }else{
+        statuses = JSON.parse(localStorage.getItem('Statuses'));
+    }
     console.log('hello')
     for (var i=0; i < items.length; i++) {
         //Shopping DIV
     const shoppingDiv = document.createElement("div");
     shoppingDiv.classList.add('shopping');
+    if (statuses[i] === 'completed') {
+        shoppingDiv.classList.add('completed');
+    }
     //Create LI
     const newItem = document.createElement("li");
     newItem.innerText = items[i] + " x " + amounts[i];
     newItem.classList.add("shopping-item");
     shoppingDiv.appendChild(newItem);
     //ADD PRICE
-    const itemPrice = document.createElement("p");
-    itemPrice.innerText = prices[i] * amounts[i] + " €";
+    const itemPrice = document.createElement("span");
+    tempPrice = Math.round((prices[i] * amounts[i] + Number.EPSILON) * 100) / 100;
+    itemPrice.innerText =  tempPrice + " €";
     itemPrice.classList.add("item-price");
     shoppingDiv.appendChild(itemPrice);
     //CHECK MARK BUTTON
@@ -169,11 +187,35 @@ function removeLocalSave(Item) {
     }else{
         Prices = JSON.parse(localStorage.getItem('Prices'));
     }
+    if(localStorage.getItem('Statuses') === null) {
+        Statuses = [];
+    }else{
+        Statuses = JSON.parse(localStorage.getItem('Statuses'));
+    }
     const itemIndex = Items.indexOf(Item.children[0].innerText.split(" ")[0]);
     Items.splice(itemIndex, 1);
     Amounts.splice(itemIndex, 1);
     Prices.splice(itemIndex, 1);
-    localStorage.setItem("Items", JSON.stringify(Items))
-    localStorage.setItem("Amounts", JSON.stringify(Amounts))
-    localStorage.setItem("Prices", JSON.stringify(Prices))
+    Statuses.splice(itemIndex, 1);
+    localStorage.setItem("Items", JSON.stringify(Items));
+    localStorage.setItem("Amounts", JSON.stringify(Amounts));
+    localStorage.setItem("Prices", JSON.stringify(Prices));
+    localStorage.setItem("Statuses", JSON.stringify(Statuses));
+}
+
+function changeLocalStatus(Item, status) {
+    let Items;
+    if(localStorage.getItem('Items') === null) {
+        Items = [];
+    }else{
+        Items = JSON.parse(localStorage.getItem('Items'));
+    }
+    if(localStorage.getItem('Statuses') === null) {
+        Statuses = [];
+    }else{
+        Statuses = JSON.parse(localStorage.getItem('Statuses'));
+    }
+    const itemIndex = Items.indexOf(Item.children[0].innerText.split(" ")[0]);
+    Statuses.splice(itemIndex, 1, status);
+    localStorage.setItem("Statuses", JSON.stringify(Statuses));
 }
