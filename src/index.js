@@ -5,12 +5,43 @@ const price = document.querySelector("#price-input");
 const shoppingList = document.querySelector(".shopping-list");
 const addButton = document.querySelector("#add-btn");
 const totalPar = document.querySelector('#total-par');
+const lang = document.querySelectorAll('.lang');
+const langDiv = document.querySelector('.languageDiv');
+const title = document.querySelector('.title');
+const homeLink = document.querySelector('#home');
+
 
 //Event Listener
 window.addEventListener("load", getLocalSave);
 addButton.addEventListener("click", addItem);
 shoppingList.addEventListener("click", deleteCheck);
+lang.forEach(el => {
+    el.addEventListener('click', changeLanguage);
+})
 
+//Variables
+var data = {
+    "english":
+    {
+        "home": "Home",
+        "title": "Shopping List",
+        "item": "Item",
+        "amount": "Amount",
+        "ppi": "Price per item",
+        "total": "Total"
+    },
+    "estonian":
+    {
+        "home": "Kodu",
+        "title": "Ostunimekiri",
+        "item": "Kaup",
+        "amount": "Kogus",
+        "ppi": "Tükihind",
+        "total": "Kogusumma"
+    }
+}
+
+var curTotalText = "Total"
 
 //Functions
 
@@ -67,7 +98,7 @@ function updateTotal() {
     }
     total = Math.round((total + Number.EPSILON) * 100) / 100;
 
-    totalPar.innerHTML = 'Total = ' + total + ' €';
+    totalPar.innerHTML = curTotalText + ' = ' + total + ' €';
 }
 
 function deleteCheck(event) {
@@ -113,6 +144,7 @@ function getLocalSave(){
     let amounts;
     let prices;
     let statuses;
+    let selectedLanguage;
     if(localStorage.getItem('Items') === null) {
         items = [];
     }else{
@@ -133,7 +165,13 @@ function getLocalSave(){
     }else{
         statuses = JSON.parse(localStorage.getItem('Statuses'));
     }
-    console.log('hello')
+    if(localStorage.getItem('Language') === null) {
+        selectedLanguage = "english";
+    }else{
+        selectedLanguage = localStorage.getItem('Language');
+    }
+    updateLanguage(selectedLanguage);
+    document.querySelector("[language=" + selectedLanguage+ "]").classList.add("selected");
     for (var i=0; i < items.length; i++) {
         //Shopping DIV
     const shoppingDiv = document.createElement("div");
@@ -218,4 +256,24 @@ function changeLocalStatus(Item, status) {
     const itemIndex = Items.indexOf(Item.children[0].innerText.split(" ")[0]);
     Statuses.splice(itemIndex, 1, status);
     localStorage.setItem("Statuses", JSON.stringify(Statuses));
+}
+
+function changeLanguage(event) {
+    const item = event.target;
+    langDiv.querySelector('.selected').classList.remove('selected');
+    item.classList.add('selected');
+    console.log(homeLink);
+    const attr = item.getAttribute('language');
+    updateLanguage(attr);
+    localStorage.setItem("Language", attr);
+}
+
+function updateLanguage(attr) {
+    homeLink.textContent = data[attr].home;
+    title.textContent = data[attr].title;
+    itemInput.setAttribute('placeholder', data[attr].item);
+    amount.setAttribute('placeholder', data[attr].amount);
+    price.setAttribute('placeholder', data[attr].ppi);
+    curTotalText = data[attr].total
+    updateTotal();
 }

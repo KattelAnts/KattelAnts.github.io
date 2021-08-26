@@ -54,3 +54,13 @@ h1{
     transform: translateY(8rem);
     opacity: 0;
 }
+
+.lang{
+    width: 5%; 
+    margin: 1rem 0.5rem 1rem 0.5rem; 
+    opacity: 0.2;
+}
+
+.selected{
+   opacity: 1; 
+}
